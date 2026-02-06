@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import Parser from 'web-tree-sitter';
+import { buildControlFlowGraph, ControlFlowGraph } from './cfgBuilder'; // Import the new function and types
 
 let parser: Parser;
 
@@ -32,15 +33,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(helloWorldDisposable);
 
-    // New command to parse the active editor's code
+    // New command to parse the active editor's code and build CFG
     let parseCodeDisposable = vscode.commands.registerCommand('vscode-flowchart-extension.parseCode', () => {
         const editor = vscode.window.activeTextEditor;
         if (editor && parser) {
             const document = editor.document;
             const text = document.getText();
             const tree = parser.parse(text);
-            console.log('Tree-sitter CST for active editor:', tree.rootNode.toString());
-            vscode.window.showInformationMessage('Code parsed! Check Debug Console for CST.');
+
+            // Use the new cfgBuilder to build the Control Flow Graph
+            const cfg: ControlFlowGraph = buildControlFlowGraph(tree);
+            console.log('Generated Control Flow Graph:', JSON.stringify(cfg, null, 2)); // Log the CFG
+            vscode.window.showInformationMessage('Code parsed and CFG generated! Check Debug Console.');
         } else {
             vscode.window.showWarningMessage('No active editor or Tree-sitter parser not initialized.');
         }

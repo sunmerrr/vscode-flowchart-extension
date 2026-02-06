@@ -46,6 +46,7 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(__webpack_require__(1));
 const web_tree_sitter_1 = __importDefault(__webpack_require__(2));
+const cfgBuilder_1 = __webpack_require__(5); // Import the new function and types
 let parser;
 async function initTreeSitter() {
     await web_tree_sitter_1.default.init();
@@ -71,15 +72,17 @@ function activate(context) {
         vscode.window.showInformationMessage('Hello World from vscode-flowchart-extension!');
     });
     context.subscriptions.push(helloWorldDisposable);
-    // New command to parse the active editor's code
+    // New command to parse the active editor's code and build CFG
     let parseCodeDisposable = vscode.commands.registerCommand('vscode-flowchart-extension.parseCode', () => {
         const editor = vscode.window.activeTextEditor;
         if (editor && parser) {
             const document = editor.document;
             const text = document.getText();
             const tree = parser.parse(text);
-            console.log('Tree-sitter CST for active editor:', tree.rootNode.toString());
-            vscode.window.showInformationMessage('Code parsed! Check Debug Console for CST.');
+            // Use the new cfgBuilder to build the Control Flow Graph
+            const cfg = (0, cfgBuilder_1.buildControlFlowGraph)(tree);
+            console.log('Generated Control Flow Graph:', JSON.stringify(cfg, null, 2)); // Log the CFG
+            vscode.window.showInformationMessage('Code parsed and CFG generated! Check Debug Console.');
         }
         else {
             vscode.window.showWarningMessage('No active editor or Tree-sitter parser not initialized.');
@@ -121,6 +124,63 @@ module.exports = require("fs");
 
 "use strict";
 module.exports = require("path");
+
+/***/ }),
+/* 5 */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CFGNodeType = void 0;
+exports.buildControlFlowGraph = buildControlFlowGraph;
+// CFG 노드의 종류를 정의합니다.
+var CFGNodeType;
+(function (CFGNodeType) {
+    CFGNodeType["Entry"] = "Entry";
+    CFGNodeType["Exit"] = "Exit";
+    CFGNodeType["Statement"] = "Statement";
+    CFGNodeType["Condition"] = "Condition";
+    CFGNodeType["Block"] = "Block";
+    CFGNodeType["Loop"] = "Loop";
+    CFGNodeType["FunctionCall"] = "FunctionCall";
+})(CFGNodeType || (exports.CFGNodeType = CFGNodeType = {}));
+/**
+ * Tree-sitter AST(CST)를 탐색하여 Control Flow Graph (CFG)를 구축합니다.
+ * @param tree Tree-sitter의 파싱된 트리
+ * @returns 구축된 ControlFlowGraph 객체
+ */
+function buildControlFlowGraph(tree) {
+    const nodes = [];
+    const edges = [];
+    let nodeIdCounter = 0; // Simple counter for unique IDs
+    const entryNode = {
+        id: `node-${nodeIdCounter++}`,
+        type: CFGNodeType.Entry,
+        text: "Entry",
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } } // Placeholder
+    };
+    nodes.push(entryNode);
+    // Placeholder for actual AST traversal and CFG construction logic
+    // This will be implemented in subsequent steps.
+    const exitNode = {
+        id: `node-${nodeIdCounter++}`,
+        type: CFGNodeType.Exit,
+        text: "Exit",
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } } // Placeholder
+    };
+    nodes.push(exitNode);
+    // Connect entry to exit for now (placeholder)
+    edges.push({ from: entryNode.id, to: exitNode.id });
+    console.log("Building CFG (placeholder logic for now)...", tree.rootNode.toString());
+    return {
+        nodes,
+        edges,
+        entryNodeId: entryNode.id,
+        exitNodeId: exitNode.id
+    };
+}
+
 
 /***/ })
 /******/ 	]);
