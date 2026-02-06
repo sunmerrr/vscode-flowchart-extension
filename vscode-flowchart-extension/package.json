@@ -16,6 +16,10 @@
       {
         "command": "vscode-flowchart-extension.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "vscode-flowchart-extension.parseCode",
+        "title": "Parse Code"
       }
     ]
   },
